@@ -31,8 +31,8 @@
       <h1 class="text-center">Large Bank Management System</h1>
     </div><!-- Application title -->
 
-    <!--Customer grid -->
-    <div data-bind="visible: displayedPage() == 'customer.All'">
+    <!--Customer grid displaying all customers-->
+    <div data-bind="visible: displayedPage() == displayPageAllCustomers()">
 
       <!--Customer heading, with Add Customer button -->
       <div>
@@ -42,9 +42,8 @@
         </span></h1>
 
         <!-- Customer table -->
-        <table>
+        <table class="table">
           <thead>
-          </thead>
             <tr>
               <th>First Name</th>
               <th>Last Name</th>
@@ -54,6 +53,7 @@
               <th>State</th>
               <th>Zip Code</th>
             </tr>
+          </thead>
           <tbody data-bind="foreach: customersTable">
             <tr>
               <!-- Customer fields -->
@@ -67,23 +67,96 @@
               <!-- Edit and delete buttons  -->
               <td>
                 <button class="btn btn-info"
-                    data-bind="click: editCustomer">Edit</button>
+                    data-bind="click: $root.editCustomer">Edit</button>
                     <button class="btn btn-danger"
-                        data-bind="click: editCustomer">Delete</button>
+                        data-bind="click: $root.deleteCustomer">Delete</button>
               </td>
             </tr>
           </tbody>
-        </table><!-- Customer table -->
+        </table><!-- End customer table -->
 
-      </div><!-- Customer heading -->
+      </div><!-- End customer heading -->
 
-    </div><!-- Customer grid -->
+    </div><!-- End customer grid -->
 
-    <!-- Add/edit customer -->
-    <div data-bind="visible: displayedPage() == 'customer.Add' || displayedPage() == 'customer.Edit'" >
-    </div><!-- Add/edit customer -->
+    <!-- Customer detail pane to add/edit customer -->
+    <div data-bind="visible: displayedPage() == displayPageAddCustomer() || displayedPage() == displayPageEditCustomer()" >
+      <div class="well">
+        <div class="row"><!-- Row 1 -->
+          <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6"><!-- Column 1 -->
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" class="form-control" data-bind="value: selectedCustomer.FirstName">
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" class="form-control" data-bind="value: selectedCustomer.LastName">
+            </div>
+          </div><!-- End column 1 -->
+          <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6"><!-- Column 2 -->
+            <div class="form-group">
+              <label>Address (1)</label>
+              <input type="text" class="form-control" data-bind="value: selectedCustomer.Address1">
+            </div>
+            <div class="form-group">
+              <label>Address (2)</label>
+              <input type="text" class="form-control" data-bind="value: selectedCustomer.Address2">
+            </div>
+          </div><!-- End column 2 -->
+        </div><!-- End row 1 -->
+        <div class="row"><!-- Row 2 -->
+          <!-- Column for city: offset 6 columns -->
+          <div class="col-xs-12 col-xs-offset-6 col-sm-2 col-sm-offset-6 col-md-2 col-md-offset-6 col-lg-2 col-lg-offset-6">
+            <div class="form-group">
+              <label>City</label>
+              <input type="text" class="form-control" data-bind="value: selectedCustomer.City">
+            </div>
+          </div><!-- End column city -->
+          <!-- Column for state -->
+          <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" class="form-control" data-bind="value: selectedCustomer.State">
+            </div>
+          </div><!-- End column state -->
+          <!-- Column for zip code -->
+          <div class="col-xs-12 col-sm-2 col-md-2 col-lg-2">
+            <div class="form-group">
+              <label>Zip Code</label>
+              <input type="text" class="form-control" data-bind="value: selectedCustomer.Zip">
+            </div>
+          </div><!-- End column zip code -->
+        </div><!-- End row 2 -->
+        <div class="row"><!-- Row 3 -->
+          <!-- Column for save button: offset 10 columns -->
+          <div class="col-xs-12 col-xs-offset-11 col-sm-2 col-sm-offset-11 col-md-2 col-md-offset-11 col-lg-2 col-lg-offset-11">
+          <button class="btn btn-success"
+              data-bind="click: saveCustomer"><span class="glyphicon glyphicon-ok">Save
+          </button>
+          </div><!-- End column save button -->
+        </div><!-- End row 3 -->
+      </div><!-- End well-->
 
-  </div><!-- Container -->
+      <!-- Accounts table: display only if editing customer and there are accounts-->
+      <table class="table" data-bind="visible: displayedPage() == displayPageEditCustomer() && selectedCustumberNumberOfAccounts() > 0">
+        <thead>
+          <tr>
+            <th>Account Number</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody data-bind="foreach: selectedCustomerAccounts">
+          <tr>
+            <!-- Account fields -->
+            <td data-bind="text: AccountNumber"></td>
+            <td data-bind="text: Balance"></td>
+          </tr>
+        </tbody>
+      </table><!-- End accounts table -->
+    </div><!-- End customer detail pane -->
+
+
+  </div><!-- End container -->
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <!-- Include all compiled plugins (below), or include individual files as needed -->
