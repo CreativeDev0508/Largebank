@@ -1,0 +1,35 @@
+{
+  "name": "bootswatch-cerulean-wiredep",
+  "authors": [
+    "Jeff Ancel <jancel@gmail.com>"
+  ],
+  "description": "Cerulean theme for bootswatch, compatible with wiredep",
+  "main": [
+    "dist/bootstrap.css"
+  ],
+  "keywords": [
+    "Bootstrap",
+    "Bootswatch",
+    "Cerulean",
+    "Wiredep"
+  ],
+  "license": "MIT",
+  "homepage": "http://jancel.net",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "_release": "7f32afd2ff",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "7f32afd2ffd0f72fcd9d8acc93ef513dce9ee2bf"
+  },
+  "_source": "git://github.com/jancel/bootswatch-cerulean-wiredep.git",
+  "_target": "*",
+  "_originalSource": "bootswatch-cerulean-wiredep",
+  "_direct": true
+}
