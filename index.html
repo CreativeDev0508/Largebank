@@ -128,11 +128,17 @@
           </div><!-- End column zip code -->
         </div><!-- End row 2 -->
         <div class="row"><!-- Row 3 -->
-          <!-- Column for save button: offset 10 columns -->
-          <div class="col-xs-12 col-xs-offset-11 col-sm-2 col-sm-offset-11 col-md-2 col-md-offset-11 col-lg-2 col-lg-offset-11">
-          <button class="btn btn-success"
-              data-bind="click: saveCustomer"><span class="glyphicon glyphicon-ok">Save
-          </button>
+          <!-- Column for quit and save buttons: offset to push to right -->
+          <div class="col-xs-12 col-xs-offset-10 col-sm-2 col-sm-offset-10 col-md-2 col-md-offset-10 col-lg-2 col-lg-offset-10">
+            <button class="btn btn-danger"
+                data-bind="click: cancelSaveCustomer">
+                <!--span class="glyphicon glyphicon-remove"></span-->
+                Cancel
+            </button>
+            <button class="btn btn-success pull-right"
+              data-bind="click: saveCustomer">
+              <span class="glyphicon glyphicon-ok"></span>Save
+           </button>
           </div><!-- End column save button -->
         </div><!-- End row 3 -->
       </div><!-- End well-->

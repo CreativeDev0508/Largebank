@@ -80,7 +80,6 @@ function AppViewModel() {
 
   // Save new or edited customer
   self.saveCustomer = function() {
-
     // If adding new customer then do POST, otherwise do PUT
     if (self.displayedPage() == self.displayPageAddCustomer()) {
       $.ajax({
@@ -96,6 +95,7 @@ function AppViewModel() {
           alert('Customer ' + self.selectedCustomer.FirstName() + ' ' +
                   self.selectedCustomer.LastName() + ' was successfully added');
 
+					//  Initialize selected customer data
           //  Set indicator to display all customers
 					initializeSelectedCustomer();
           self.displayedPage(self.displayPageAllCustomers());
@@ -124,6 +124,15 @@ function AppViewModel() {
 
     }
   };
+
+	// User canceled when adding/editing customer
+	self.cancelSaveCustomer = function() {
+
+		//  Initialize selected customer data
+		// Set indicator to display all customers
+		initializeSelectedCustomer();
+		self.displayedPage(self.displayPageAllCustomers());
+	};
 
   // Delete customer
   self.deleteCustomer = function(customer) {
