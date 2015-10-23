@@ -50,34 +50,6 @@ function AppViewModel() {
 
   self.selectedCustomer = new CustomerModel(); // Customer being added or edited
   self.selectedCustomerAccounts = ko.observableArray(); // Accounts belonging to customer
-  self.selectedCustumberNumberOfAccounts = ko.observable(0); // Number of accounts belonging to customer
-
-  // Display all customers: displayedPage == 'customer.grid'
-  // Populate the customer table array
-  $.ajax({
-		type: 'GET',
-		url: apiURL + customersURLString,
-		success: function(data) {
-			ko.mapping.fromJS(data, {}, self.customersTable);
-		}
-	});
-
-	  // Initialize selectedCustomer
-	  function initializeSelectedCustomer() {
-
-	    self.selectedCustomer.CustomerId(0);
-	    self.selectedCustomer.FirstName('');
-	    self.selectedCustomer.LastName('');
-	    self.selectedCustomer.Address1('');
-	    self.selectedCustomer.Address2('');
-	    self.selectedCustomer.City('');
-			self.selectedCustomer.State('');
-	    self.selectedCustomer.Zip('');
-
-	    self.selectedCustumberNumberOfAccounts(0);
-
-	    return true;
-	  }
 
   // Add customer
   self.addCustomer = function() {
@@ -89,29 +61,14 @@ function AppViewModel() {
   self.editCustomer = function(customer) {
 
     // Get customer and account data
-    var customerURL = apiURL + customersURLString + '/' + customer.CustomerId();
     $.ajax({
   		type: 'GET',
-  		url: customerURL,
+  		url: apiURL + customersURLString + '/' + customer.CustomerId(),
   		success: function(data) {
   			ko.mapping.fromJS(data, {}, self.selectedCustomer);
 
-        // Get customer's accounts (there might be no accounts)
-        $.ajax({
-      		type: 'GET',
-      		url: customerURL + accountsURLString,
-      		success: function(data) {
-      			ko.mapping.fromJS(data, {}, self.selectedCustomerAccounts);
-
-            self.selectedCustumberNumberOfAccounts(self.selectedCustomerAccounts().length);
-      		},
-          error: function(jqXHR, textStatus, errorThrown) {
-            self.selectedCustumberNumberOfAccounts(0);
-            if(jqXHR.status == 404 || errorThrown == 'Not Found')
-            {
-            }
-          }
-      	});
+        // Get customer's accounts
+				getCustomerAccounts(customer);
 
 		    //   set indicator to switch to edit customer page
         self.displayedPage(self.displayPageEditCustomer());
@@ -120,15 +77,6 @@ function AppViewModel() {
   	});
 
   };
-
-	// Push new customer to customer table arrray
-  function pushNewCustomer() {
-
-		var newCustomer = ko.mapping.fromJS(ko.mapping.toJS(self.selectedCustomer));
-		self.customersTable.push(newCustomer);
-
-    return true;
-  }
 
   // Save new or edited customer
   self.saveCustomer = function() {
@@ -149,6 +97,7 @@ function AppViewModel() {
                   self.selectedCustomer.LastName() + ' was successfully added');
 
           //  Set indicator to display all customers
+					initializeSelectedCustomer();
           self.displayedPage(self.displayPageAllCustomers());
 
         }
@@ -166,7 +115,9 @@ function AppViewModel() {
           alert('Customer ' + self.selectedCustomer.FirstName() + ' ' +
                   self.selectedCustomer.LastName() + ' was successfully updated');
 
-          // Set indicator to display all customers
+					// Reload customers
+					// Set indicator to display all customers
+					self.reload.customers();
           self.displayedPage(self.displayPageAllCustomers());
         }
       });
@@ -179,6 +130,7 @@ function AppViewModel() {
 		if (confirm('Are you sure you want to delete customer ' +
 							customer.FirstName() + ' ' +
 									customer.LastName() + '?') == true) {
+
 				$.ajax({
 					type: 'DELETE',
 					url: apiURL + customersURLString + '/' + customer.CustomerId(),
@@ -186,12 +138,86 @@ function AppViewModel() {
 											alert('Customer ' +
 																customer.FirstName() + ' ' +
 																		customer.LastName() + ' was deleted');
+
+							// Remove the customer from the displayed customer table
+					    self.customersTable.remove(customer);
+							initializeSelectedCustomerAccounts();
 					}
-				});
-
+					});
 		}
+ };
 
-  };
+  // Populate the customer table array from the customer table in the DB
+  self.reload = {
+		customers: function() {
+ 	 		$.ajax({
+ 		 					type: 'GET',
+ 		 				  url: apiURL + customersURLString,
+ 		 					success: function(data) {
+ 			 					ko.mapping.fromJS(data, {}, self.customersTable);
+ 		 					}
+ 	 		});
+  	}
+	};
+
+ // Read the accounts for the customer,
+ //  and map them to selectedCustomerAccounts
+ // If accounts can't be read, initialize selectedCustomerAccounts
+ // Return the length of selectedCustomerAccounts array
+
+ function getCustomerAccounts(customer) {
+	 $.ajax({
+		 type: 'GET',
+		 url: apiURL + customersURLString + '/' + customer.CustomerId() + accountsURLString,
+		 success: function(data) {
+			 ko.mapping.fromJS(data, {}, self.selectedCustomerAccounts);
+		 },
+		 error: function(jqXHR, textStatus, errorThrown) {
+			 initializeSelectedCustomerAccounts();
+			 //if(jqXHR.status == 404 || errorThrown == 'Not Found') {}
+		 }
+	 });
+
+	 return self.selectedCustomerAccounts().length;
+ }
+
+ // Initialize selectedCustomerAccounts
+ function initializeSelectedCustomerAccounts() {
+
+	 self.selectedCustomerAccounts.removeAll();
+
+	 return true;
+ }
+
+	 // Initialize selectedCustomer & selectedCustomerAccounts
+	 function initializeSelectedCustomer() {
+
+		 self.selectedCustomer.CustomerId(0);
+		 self.selectedCustomer.FirstName('');
+		 self.selectedCustomer.LastName('');
+		 self.selectedCustomer.Address1('');
+		 self.selectedCustomer.Address2('');
+		 self.selectedCustomer.City('');
+		 self.selectedCustomer.State('');
+		 self.selectedCustomer.Zip('');
+
+		 initializeSelectedCustomerAccounts();
+
+		 return true;
+	 }
+
+	 // Push new customer to customer table arrray
+	 function pushNewCustomer() {
+
+		 var newCustomer = ko.mapping.fromJS(ko.mapping.toJS(self.selectedCustomer));
+		 self.customersTable.push(newCustomer);
+
+		 return true;
+	 }
+
+	   // After all definitions are done, display the customers
+	   self.reload.customers();
+
 
 }; // End AppViewModel
 
