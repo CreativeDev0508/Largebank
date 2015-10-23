@@ -202,13 +202,13 @@ function AppViewModel() {
 	 function initializeSelectedCustomer() {
 
 		 self.selectedCustomer.CustomerId(0);
-		 self.selectedCustomer.FirstName('');
-		 self.selectedCustomer.LastName('');
-		 self.selectedCustomer.Address1('');
-		 self.selectedCustomer.Address2('');
-		 self.selectedCustomer.City('');
-		 self.selectedCustomer.State('');
-		 self.selectedCustomer.Zip('');
+		 self.selectedCustomer.FirstName(null);
+		 self.selectedCustomer.LastName(null);
+		 self.selectedCustomer.Address1(null);
+		 self.selectedCustomer.Address2(null);
+		 self.selectedCustomer.City(null);
+		 self.selectedCustomer.State(null);
+		 self.selectedCustomer.Zip(null);
 
 		 initializeSelectedCustomerAccounts();
 
