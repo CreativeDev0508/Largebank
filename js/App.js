@@ -80,49 +80,54 @@ function AppViewModel() {
 
   // Save new or edited customer
   self.saveCustomer = function() {
-    // If adding new customer then do POST, otherwise do PUT
-    if (self.displayedPage() == self.displayPageAddCustomer()) {
-      $.ajax({
-        type: 'POST',
-        url: apiURL + customersURLString,
-        contentType: 'application/json;charset=utf-8',
-        data: ko.mapping.toJSON(self.selectedCustomer),
-        success: function(data) {
+		// Validate the entered customer data
+		if (validateCustomer()) {
+			// If adding new customer then do POST, otherwise do PUT
+	    if (self.displayedPage() == self.displayPageAddCustomer()) {
+	      $.ajax({
+	        type: 'POST',
+	        url: apiURL + customersURLString,
+	        contentType: 'application/json;charset=utf-8',
+	        data: ko.mapping.toJSON(self.selectedCustomer),
+	        success: function(data) {
 
-          // Push new customer onto customer array
-					pushNewCustomer();
+	          // Push new customer onto customer array
+						pushNewCustomer();
 
-          alert('Customer ' + self.selectedCustomer.FirstName() + ' ' +
-                  self.selectedCustomer.LastName() + ' was successfully added');
+						toastr.success('Customer ' + self.selectedCustomer.FirstName() + ' ' +
+	                  self.selectedCustomer.LastName() + ' was successfully added');
 
-					//  Initialize selected customer data
-          //  Set indicator to display all customers
-					initializeSelectedCustomer();
-          self.displayedPage(self.displayPageAllCustomers());
+						//  Initialize selected customer data
+	          //  Set indicator to display all customers
+						initializeSelectedCustomer();
+	          self.displayedPage(self.displayPageAllCustomers());
 
-        }
-      });
+	        },
+					error: function(jqXHR, textStatus, errorThrown) {
+						toastr.error(JSON.parse(jqXHR.responseText).ExceptionMessage, 'Error Adding Customer');
+		 		 }
+	      });
 
-    } // Updating customer: use PUT
-    else {
-      $.ajax({
-        type: 'PUT',
-        url: apiURL + customersURLString + '/' + self.selectedCustomer.CustomerId(),
-        contentType: 'application/json;charset=utf-8',
-        data: ko.mapping.toJSON(self.selectedCustomer),
-        success: function(data) {
+	    } // Updating customer: use PUT
+	    else {
+	      $.ajax({
+	        type: 'PUT',
+	        url: apiURL + customersURLString + '/' + self.selectedCustomer.CustomerId(),
+	        contentType: 'application/json;charset=utf-8',
+	        data: ko.mapping.toJSON(self.selectedCustomer),
+	        success: function(data) {
 
-          alert('Customer ' + self.selectedCustomer.FirstName() + ' ' +
-                  self.selectedCustomer.LastName() + ' was successfully updated');
+	          toastr.success('Customer ' + self.selectedCustomer.FirstName() + ' ' +
+	                  self.selectedCustomer.LastName() + ' was successfully updated');
 
-					// Reload customers
-					// Set indicator to display all customers
-					self.reload.customers();
-          self.displayedPage(self.displayPageAllCustomers());
-        }
-      });
-
-    }
+						// Reload customers
+						// Set indicator to display all customers
+						self.reload.customers();
+	          self.displayedPage(self.displayPageAllCustomers());
+	        }
+	      });
+	    }
+		}
   };
 
 	// User canceled when adding/editing customer
@@ -168,6 +173,28 @@ function AppViewModel() {
  	 		});
   	}
 	};
+
+	// Validate the data entered in  selectedCustomer fields
+	// Return true if fields not allowed to be null are not null,
+	//  otherwise return false and output message
+  function validateCustomer() {
+
+		// Validate that the following are not null: first name, last name,
+		//  address1, city, state
+		if (self.selectedCustomer.FirstName() == null ||
+					self.selectedCustomer.LastName() == null ||
+					self.selectedCustomer.Address1() == null ||
+					self.selectedCustomer.City() == null ||
+					self.selectedCustomer.State() == null) {
+				toastr.warning('The following fields cannot be empty: ' +
+														'First Name, Last Name, Address(1), City, State',
+														'Required Field(s) Empty');
+				return false;
+		}
+		else {
+			return true;
+		}
+  }
 
  // Read the accounts for the customer,
  //  and map them to selectedCustomerAccounts
