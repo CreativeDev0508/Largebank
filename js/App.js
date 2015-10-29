@@ -53,9 +53,41 @@ function AppViewModel() {
 
   // Add customer
   self.addCustomer = function() {
-		initializeSelectedCustomer();
+	self.initializeSelectedCustomer();
     self.displayedPage(self.displayPageAddCustomer());
   };
+
+	// User canceled when adding/editing customer
+	self.cancelSaveCustomer = function() {
+
+		//  Initialize selected customer data
+		// Set indicator to display all customers
+		self.initializeSelectedCustomer();
+		self.displayedPage(self.displayPageAllCustomers());
+	};
+
+
+  // Delete customer
+  self.deleteCustomer = function(customer) {		
+		if (confirm('Are you sure you want to delete customer ' +
+							customer.FirstName() + ' ' +
+									customer.LastName() + '?') == true) {
+
+				$.ajax({
+					type: 'DELETE',
+					url: apiURL + customersURLString + '/' + customer.CustomerId(),
+					success: function(data) {
+											toastr.error('Customer ' +
+																customer.FirstName() + ' ' +
+																		customer.LastName() + ' was deleted');
+
+							// Remove the customer from the displayed customer table
+					    self.customersTable.remove(customer);
+						self.initializeSelectedCustomerAccounts();
+					}
+					});
+		}
+ };
 
   // Edit customer
   self.editCustomer = function(customer) {
@@ -68,20 +100,75 @@ function AppViewModel() {
   			ko.mapping.fromJS(data, {}, self.selectedCustomer);
 
         // Get customer's accounts
-				getCustomerAccounts(customer);
+		self.getCustomerAccounts(customer);
 
 		    //   set indicator to switch to edit customer page
         self.displayedPage(self.displayPageEditCustomer());
 
   		}
   	});
-
   };
+
+   // Read the accounts for the customer,
+  //  and map them to selectedCustomerAccounts
+  // If accounts can't be read, initialize selectedCustomerAccounts
+  // Return the length of selectedCustomerAccounts array
+
+  self.getCustomerAccounts = function (customer) {
+	 $.ajax({
+		 type: 'GET',
+		 url: apiURL + customersURLString + '/' + customer.CustomerId() + accountsURLString,
+		 success: function(data) {
+			 ko.mapping.fromJS(data, {}, self.selectedCustomerAccounts);
+		 },
+		 error: function(jqXHR, textStatus, errorThrown) {
+			 self.initializeSelectedCustomerAccounts();
+			 //if(jqXHR.status == 404 || errorThrown == 'Not Found') {}
+		 }
+	 });
+
+	 return self.selectedCustomerAccounts().length;
+ 	};
+
+  // Initialize selectedCustomer & selectedCustomerAccounts
+  self.initializeSelectedCustomer = function() {
+
+		 self.selectedCustomer.CustomerId(0);
+		 self.selectedCustomer.FirstName(null);
+		 self.selectedCustomer.LastName(null);
+		 self.selectedCustomer.Address1(null);
+		 self.selectedCustomer.Address2(null);
+		 self.selectedCustomer.City(null);
+		 self.selectedCustomer.State(null);
+		 self.selectedCustomer.Zip(null);
+
+		 self.initializeSelectedCustomerAccounts();
+
+		 return true;
+  };
+
+  // Initialize selectedCustomerAccounts
+   self.initializeSelectedCustomerAccounts = function() {
+
+	 	self.selectedCustomerAccounts.removeAll();
+
+	 return true;
+   };
+
+
+   // Push new customer to customer table arrray
+   self.pushNewCustomer = function() {
+
+		 var newCustomer = ko.mapping.fromJS(ko.mapping.toJS(self.selectedCustomer));
+		 self.customersTable.push(newCustomer);
+
+		 return true;
+   };
 
   // Save new or edited customer
   self.saveCustomer = function() {
 		// Validate the entered customer data
-		if (validateCustomer()) {
+		if (self.validateCustomer()) {
 			// If adding new customer then do POST, otherwise do PUT
 	    if (self.displayedPage() == self.displayPageAddCustomer()) {
 	      $.ajax({
@@ -91,16 +178,17 @@ function AppViewModel() {
 	        data: ko.mapping.toJSON(self.selectedCustomer),
 	        success: function(data) {
 
-	          // Push new customer onto customer array
-						pushNewCustomer();
+	          // Push new customer onto customer array after setting the new customer ID
+	          	self.selectedCustomer.CustomerId(data.CustomerId);
+				self.pushNewCustomer();
 
-						toastr.success('Customer ' + self.selectedCustomer.FirstName() + ' ' +
+				toastr.success('Customer ' + self.selectedCustomer.FirstName() + ' ' +
 	                  self.selectedCustomer.LastName() + ' was successfully added');
 
 						//  Initialize selected customer data
 	          //  Set indicator to display all customers
-						initializeSelectedCustomer();
-	          self.displayedPage(self.displayPageAllCustomers());
+				self.initializeSelectedCustomer();
+	          	self.displayedPage(self.displayPageAllCustomers());
 
 	        },
 					error: function(jqXHR, textStatus, errorThrown) {
@@ -122,44 +210,13 @@ function AppViewModel() {
 
 						// Reload customers
 						// Set indicator to display all customers
-						self.reload.customers();
+			  self.reload.customers();
 	          self.displayedPage(self.displayPageAllCustomers());
 	        }
 	      });
 	    }
 		}
   };
-
-	// User canceled when adding/editing customer
-	self.cancelSaveCustomer = function() {
-
-		//  Initialize selected customer data
-		// Set indicator to display all customers
-		initializeSelectedCustomer();
-		self.displayedPage(self.displayPageAllCustomers());
-	};
-
-  // Delete customer
-  self.deleteCustomer = function(customer) {
-		if (confirm('Are you sure you want to delete customer ' +
-							customer.FirstName() + ' ' +
-									customer.LastName() + '?') == true) {
-
-				$.ajax({
-					type: 'DELETE',
-					url: apiURL + customersURLString + '/' + customer.CustomerId(),
-					success: function(data) {
-											toastr.error('Customer ' +
-																customer.FirstName() + ' ' +
-																		customer.LastName() + ' was deleted');
-
-							// Remove the customer from the displayed customer table
-					    self.customersTable.remove(customer);
-							initializeSelectedCustomerAccounts();
-					}
-					});
-		}
- };
 
   // Populate the customer table array from the customer table in the DB
   self.reload = {
@@ -177,7 +234,7 @@ function AppViewModel() {
 	// Validate the data entered in  selectedCustomer fields
 	// Return true if fields not allowed to be null are not null,
 	//  otherwise return false and output message
-  function validateCustomer() {
+  self.validateCustomer = function() {
 
 		// Validate that the following are not null: first name, last name,
 		//  address1, city, state
@@ -194,62 +251,7 @@ function AppViewModel() {
 		else {
 			return true;
 		}
-  }
-
- // Read the accounts for the customer,
- //  and map them to selectedCustomerAccounts
- // If accounts can't be read, initialize selectedCustomerAccounts
- // Return the length of selectedCustomerAccounts array
-
- function getCustomerAccounts(customer) {
-	 $.ajax({
-		 type: 'GET',
-		 url: apiURL + customersURLString + '/' + customer.CustomerId() + accountsURLString,
-		 success: function(data) {
-			 ko.mapping.fromJS(data, {}, self.selectedCustomerAccounts);
-		 },
-		 error: function(jqXHR, textStatus, errorThrown) {
-			 initializeSelectedCustomerAccounts();
-			 //if(jqXHR.status == 404 || errorThrown == 'Not Found') {}
-		 }
-	 });
-
-	 return self.selectedCustomerAccounts().length;
- }
-
- // Initialize selectedCustomerAccounts
- function initializeSelectedCustomerAccounts() {
-
-	 self.selectedCustomerAccounts.removeAll();
-
-	 return true;
- }
-
-	 // Initialize selectedCustomer & selectedCustomerAccounts
-	 function initializeSelectedCustomer() {
-
-		 self.selectedCustomer.CustomerId(0);
-		 self.selectedCustomer.FirstName(null);
-		 self.selectedCustomer.LastName(null);
-		 self.selectedCustomer.Address1(null);
-		 self.selectedCustomer.Address2(null);
-		 self.selectedCustomer.City(null);
-		 self.selectedCustomer.State(null);
-		 self.selectedCustomer.Zip(null);
-
-		 initializeSelectedCustomerAccounts();
-
-		 return true;
-	 }
-
-	 // Push new customer to customer table arrray
-	 function pushNewCustomer() {
-
-		 var newCustomer = ko.mapping.fromJS(ko.mapping.toJS(self.selectedCustomer));
-		 self.customersTable.push(newCustomer);
-
-		 return true;
-	 }
+  };
 
 	   // After all definitions are done, display the customers
 	   self.reload.customers();
