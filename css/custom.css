@@ -1,15 +1,11 @@
 body {
-	background-color: #FCF1E3;
+	background-color: #FAF0E6;
 }
 
 .container-color {
-	background-color: #FCF1E3;
+	background-color: #FAF0E6;
 }
 
-.panel-body {
-    height: 270px;
-
-}
 .other-color{
     background: LightBlue;
   }

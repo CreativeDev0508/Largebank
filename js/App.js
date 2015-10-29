@@ -149,7 +149,7 @@ function AppViewModel() {
 					type: 'DELETE',
 					url: apiURL + customersURLString + '/' + customer.CustomerId(),
 					success: function(data) {
-											alert('Customer ' +
+											toastr.error('Customer ' +
 																customer.FirstName() + ' ' +
 																		customer.LastName() + ' was deleted');
 
