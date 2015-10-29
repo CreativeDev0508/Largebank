@@ -1,9 +1,19 @@
+body {
+	background-color: #FCF1E3;
+}
+
+.container-color {
+	background-color: #FCF1E3;
+}
+
 .panel-body {
     height: 270px;
+
 }
 .other-color{
-    background: LightBlue
+    background: LightBlue;
   }
+
 .well {
-  background: AliceBlue
+  background: AliceBlue;
 }
